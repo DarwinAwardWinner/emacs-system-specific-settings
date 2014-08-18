@@ -92,22 +92,47 @@ some non-nil value."
     (equal value spec))))
 
 ;;;###autoload
-(defmacro eval-on-system-type (system &rest body)
-  "Eval BODY only if `system-type' matches SYSTEM.
+(defmacro if-system-type-match (cond then &rest else)
+  "If COND matches `system-type', do THEN, else do ELSE.
 
 Matching is done using `system-specific-settings-do-match'."
-  (declare (indent 1))
-  `(when (system-specific-settings-do-match system-type ,system)
-     ,@body))
+  (declare (indent 2))
+  `(if (system-specific-settings-do-match system-type ,cond)
+       ,then
+     ,@else))
 
 ;;;###autoload
-(defmacro eval-on-host (host &rest body)
-  "Eval BODY only if `system-name' matches SYSTEM.
+(defmacro if-system-name-match (cond then &rest else)
+  "If COND matches `system-name', do THEN, else do ELSE.
+
+Matching is done using `system-specific-settings-do-match'."
+  (declare (indent 2))
+  `(if (system-specific-settings-do-match system-name ,cond)
+       ,then
+     ,@else))
+
+;;;###autoload
+(defmacro when-system-type-match (cond &rest body)
+  "Eval BODY only if `system-type' matches COND.
 
 Matching is done using `system-specific-settings-do-match'."
   (declare (indent 1))
-  `(when (system-specific-settings-do-match system-name ,host)
-     ,@body))
+  `(if-system-type-match ,cond
+       (progn ,@body)))
+
+;;;###autoload
+(defmacro when-system-name-match (cond &rest body)
+  "Eval BODY only if `system-name' matches COND.
+
+Matching is done using `system-specific-settings-do-match'."
+  (declare (indent 1))
+  `(if-system-name-match ,cond
+       (progn ,@body)))
+
+(define-obsolete-function-alias 'eval-on-system-type 'when-system-type-match
+  "0.2")
+(define-obsolete-function-alias 'eval-on-host 'when-system-name-match
+  "0.2")
 
 (provide 'system-specific-settings)
 
